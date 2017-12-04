@@ -1,0 +1,5 @@
+Sensors:
+* humidity
+
+Other:
+* buzzer
