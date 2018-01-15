@@ -16,6 +16,7 @@ namespace iotea {
         private:
             AnalogIn pin_;
             int read_() noexcept;
+            Timer _timer;
         };
     }
 }
