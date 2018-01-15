@@ -1,4 +1,4 @@
-#include "humidity.h"
+pin_#include "humidity.h"
 
 using namespace iotea::puerth;
 using namespace iotea::protocol;
@@ -21,27 +21,27 @@ int HumiditySensor::read_() noexcept {
 	_timer.stop();
 
 	// Notify it we are ready to read
-	_pin.output();
-	_pin = 0;
+	pin_.output();
+	pin_ = 0;
 	wait_ms(18);
-	_pin = 1;
+	pin_ = 1;
 	wait_us(40);
-	_pin.input();
+	pin_.input();
 
 	// ACKNOWLEDGE or TIMEOUT
 	unsigned int loopCnt = 10000;
-	while(_pin == 0)
+	while(pin_ == 0)
 			if (loopCnt-- == 0) return 0;
 
 	loopCnt = 10000;
-	while(_pin == 1)
+	while(pin_ == 1)
 			if (loopCnt-- == 0) return 0;
 
 	// READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
 	for (int i=0; i<40; i++)
 	{
 			loopCnt = 10000;
-			while(_pin == 0)
+			while(pin_ == 0)
 					if (loopCnt-- == 0) return 0;
 
 			//unsigned long t = micros();
@@ -49,7 +49,7 @@ int HumiditySensor::read_() noexcept {
 			t. start();
 
 			loopCnt = 10000;
-			while(_pin == 1)
+			while(pin_ == 1)
 					if (loopCnt-- == 0) return 0;
 
 			if (t.read_us() > 40) bits[idx] |= (1 << cnt);
