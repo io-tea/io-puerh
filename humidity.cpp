@@ -1,13 +1,12 @@
-pin_#include "humidity.h"
+#include "humidity.h"
 
 using namespace iotea::puerth;
-using namespace iotea::protocol;
 
-HumiditySensor::HumiditySensor(PinName pin) noexcept : pin_(pin) {
+HumiditySensor::HumiditySensor(PinName pin) noexcept : _pin(pin) {
 	_timer.start();
 }
 
-int HumiditySensor::read_() noexcept {
+int HumiditySensor::read() noexcept {
 	// BUFFER TO RECEIVE
 	uint8_t bits[5];
 	uint8_t cnt = 7;
@@ -21,27 +20,27 @@ int HumiditySensor::read_() noexcept {
 	_timer.stop();
 
 	// Notify it we are ready to read
-	pin_.output();
-	pin_ = 0;
+	_pin.output();
+	_pin = 0;
 	wait_ms(18);
-	pin_ = 1;
+	_pin = 1;
 	wait_us(40);
-	pin_.input();
+	_pin.input();
 
 	// ACKNOWLEDGE or TIMEOUT
 	unsigned int loopCnt = 10000;
-	while(pin_ == 0)
+	while(_pin == 0)
 			if (loopCnt-- == 0) return 0;
 
 	loopCnt = 10000;
-	while(pin_ == 1)
+	while(_pin == 1)
 			if (loopCnt-- == 0) return 0;
 
 	// READ OUTPUT - 40 BITS => 5 BYTES or TIMEOUT
 	for (int i=0; i<40; i++)
 	{
 			loopCnt = 10000;
-			while(pin_ == 0)
+			while(_pin == 0)
 					if (loopCnt-- == 0) return 0;
 
 			//unsigned long t = micros();
@@ -49,7 +48,7 @@ int HumiditySensor::read_() noexcept {
 			t. start();
 
 			loopCnt = 10000;
-			while(pin_ == 1)
+			while(_pin == 1)
 					if (loopCnt-- == 0) return 0;
 
 			if (t.read_us() > 40) bits[idx] |= (1 << cnt);
@@ -65,9 +64,4 @@ int HumiditySensor::read_() noexcept {
 	uint8_t humidity    = bits[0];
 
   return humidity;
-}
-
-std::list<Message> HumiditySensor::getMessages() {
-    Message message(MessageType::HUMIDITY, read_());
-    return std::list<Message>({message});
 }

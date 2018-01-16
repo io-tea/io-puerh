@@ -1,9 +1,25 @@
-#include "io-tea/node/node.h"
 #include "mbed.h"
+#include "io-tea/node.h"
 #include "humidity.h"
 
+iotea::puerth::HumiditySensor humiditySensor(D3);
+
 int main() {
-  iotea::node::Node node(iotea::NodeName::NODE_PUERTH);
-  node.addSensor(std::make_unique<iotea::puerth::HumiditySensor>(D3)); //change pin
-  node.run();
+    setupSerial("PUERH - humidity sensor");
+    setupNodeRadio(0xABCDEF01);
+    setupTicker();
+
+    time_t lastStatsTime = time(nullptr) - 1;
+    for (int tick = 0;; ++tick) {
+        time_t now = time(nullptr);
+        if (lastStatsTime != now) {
+            lastStatsTime = now;
+            printStatus();
+        }
+
+        if (tick) {
+            tick = false;
+            sendCoapMessage("h", std::to_string(humiditySensor.read()));
+        }
+    }
 }
