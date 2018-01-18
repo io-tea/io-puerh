@@ -1,13 +1,10 @@
-pin_#include "humidity.h"
+#include "humidity.h"
 
 using namespace iotea::puerth;
-using namespace iotea::protocol;
 
-HumiditySensor::HumiditySensor(PinName pin) noexcept : pin_(pin) {
-	_timer.start();
-}
+HumiditySensor::HumiditySensor(DigitalInOut pin) noexcept : pin_(pin) {}
 
-int HumiditySensor::read_() noexcept {
+uint8_t HumiditySensor::read() noexcept {
 	// BUFFER TO RECEIVE
 	uint8_t bits[5];
 	uint8_t cnt = 7;
@@ -15,10 +12,6 @@ int HumiditySensor::read_() noexcept {
 
 	// EMPTY BUFFER
 	for (int i=0; i< 5; i++) bits[i] = 0;
-
-	// Verify sensor settled after boot
-	while(_timer.read_ms() < 1500) {}
-	_timer.stop();
 
 	// Notify it we are ready to read
 	pin_.output();
@@ -65,9 +58,4 @@ int HumiditySensor::read_() noexcept {
 	uint8_t humidity    = bits[0];
 
   return humidity;
-}
-
-std::list<Message> HumiditySensor::getMessages() {
-    Message message(MessageType::HUMIDITY, read_());
-    return std::list<Message>({message});
 }
