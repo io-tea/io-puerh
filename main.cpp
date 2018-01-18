@@ -10,7 +10,7 @@ int main() {
     setupTicker();
 
     time_t lastStatsTime = time(nullptr) - 1;
-    for (int tick = 0;; ++tick) {
+    while (true) {
         time_t now = time(nullptr);
         if (lastStatsTime != now) {
             lastStatsTime = now;
@@ -19,7 +19,12 @@ int main() {
 
         if (tick) {
             tick = false;
-            sendCoapMessage("h", std::to_string(humiditySensor.read()));
+
+            uint8_t humidity = 0;
+            while(humidity == 0 || humidity > 120) {
+              humidity = humiditySensor.read();
+            }
+            sendCoapMessage("h", std::to_string(humidity));
         }
     }
 }
